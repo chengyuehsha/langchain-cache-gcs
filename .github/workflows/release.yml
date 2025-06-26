@@ -1,0 +1,49 @@
+name: Release Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+    
+    - name: Set up Python
+      run: uv python install
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Build package
+      run: uv build
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+        generate_release_notes: true
+        body: |
+          ## 安裝方式
+          
+          透過 uv 安裝：
+          ```bash
+          uv add langchain-cache-gcs --find-links https://github.com/chengyuehsha/langchain-cache-gcs/releases/download/${{ github.ref_name }}/
+          ```
+          
+          或直接下載 wheel 檔案安裝：
+          ```bash
+          pip install https://github.com/chengyuehsha/langchain-cache-gcs/releases/download/${{ github.ref_name }}/langchain_cache_gcs-${{ github.ref_name }}-py3-none-any.whl
+          ```
